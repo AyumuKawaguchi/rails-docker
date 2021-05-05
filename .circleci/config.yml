@@ -1,0 +1,51 @@
+version: 2.1
+
+# 簡単にいうとライブラリみたいなもの。後に使うjobなどの処理コードの詳細を１つ１つ書く必要がなくなり、簡易化していける。
+orbs:
+  ruby: circleci/ruby@1.1.2
+
+jobs:
+  build:
+    docker:
+      - image: circleci/ruby2.7
+    working_directory: ~/rails_docker/src
+    steps:
+      - checkout:
+          path: ~/rails_docker
+      #orbsのおかげでrubyのbundle installをこの１行で処理を全部やってくれるって感じ
+      - ruby/install-deps
+
+  test:
+    docker:
+      - image: circleci/ruby:2.7
+      - image: circleci/mysql:5.5
+        environment:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: app_test
+          MYSQL_USER: root
+    environment:
+      BUNDLE_JOBS: "3"
+      BUNDLE_RETRY: "3"
+      APP_DATABASE_HOST: "127.0.0.1"
+      RAILS_ENV: test
+    working_directory: ~/rails-docker/src
+    steps:
+      - checkout:
+          path: ~/rails-docker
+      - ruby/install-deps
+      - run:
+          name: Database setup
+          command: bundle exec rails db:migrate
+      - run:
+          name: test
+          command: bundle exec rake test
+
+# circleciの挙動管理として、全体の動きを設定できる。今回であればbuild_and_testという名前のワークフロー名でjobsを実行する。順番はbuild,testの順番だよって書いてある。
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
