@@ -7,10 +7,10 @@ jobs:
   build:
     docker:
       - image: circleci/ruby2.7
-    working_directory: ~/rails_docker/src
+    working_directory: ~/rails-docker/src
     steps:
       - checkout:
-          path: ~/rails_docker
+          path: ~/rails-docker
       - ruby/install-deps
 
   test:
