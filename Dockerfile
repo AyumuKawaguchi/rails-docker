@@ -1,6 +1,6 @@
 FROM ruby:2.7
 
-# ENV RAILS_ENV=production aa
+ENV RAILS_ENV=production 
 
 #ここで必要なライブラリをインストールしている記述
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
